@@ -4,7 +4,7 @@
 
 package godspeed_test
 
-import "github.com/PagerDuty/godspeed/v1"
+import "github.com/PagerDuty/godspeed"
 
 func ExampleGodspeed_Send() {
 	g, err := godspeed.NewDefault()

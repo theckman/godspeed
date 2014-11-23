@@ -111,6 +111,8 @@ func TestAsyncAddTags(t *testing.T) {
 		return
 	}
 
+	defer g.Godspeed.Conn.Close()
+
 	g.AddTag("testing0")
 
 	tags := g.Godspeed.Tags
@@ -136,6 +138,8 @@ func TestAsyncSetNamespace(t *testing.T) {
 		return
 	}
 
+	defer g.Godspeed.Conn.Close()
+
 	g.SetNamespace("testing1")
 
 	if g.Godspeed.Namespace != "testing1" {
@@ -160,6 +164,8 @@ func TestAsyncEvent(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
+
+	defer g.Godspeed.Conn.Close()
 
 	g.AddTags([]string{"test0", "test1"})
 
@@ -208,6 +214,8 @@ func TestAsyncSend(t *testing.T) {
 		return
 	}
 
+	defer g.Godspeed.Conn.Close()
+
 	g.testWarmUp()
 
 	g.W.Add(1)
@@ -243,6 +251,8 @@ func TestAsyncCount(t *testing.T) {
 	if err != nil {
 		return
 	}
+
+	defer g.Godspeed.Conn.Close()
 
 	g.testWarmUp()
 
@@ -281,6 +291,8 @@ func TestAsyncIncr(t *testing.T) {
 		return
 	}
 
+	defer g.Godspeed.Conn.Close()
+
 	g.testWarmUp()
 
 	g.W.Add(1)
@@ -317,6 +329,8 @@ func TestAsyncDecr(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
+
+	defer g.Godspeed.Conn.Close()
 
 	g.testWarmUp()
 
@@ -355,6 +369,8 @@ func TestAsyncGauge(t *testing.T) {
 		return
 	}
 
+	defer g.Godspeed.Conn.Close()
+
 	g.testWarmUp()
 
 	g.W.Add(1)
@@ -391,6 +407,8 @@ func TestAsyncHistogram(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
+
+	defer g.Godspeed.Conn.Close()
 
 	g.testWarmUp()
 
@@ -429,6 +447,8 @@ func TestAsyncTiming(t *testing.T) {
 		return
 	}
 
+	defer g.Godspeed.Conn.Close()
+
 	g.testWarmUp()
 
 	g.W.Add(1)
@@ -465,6 +485,8 @@ func TestAsyncSet(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
+
+	defer g.Godspeed.Conn.Close()
 
 	g.testWarmUp()
 

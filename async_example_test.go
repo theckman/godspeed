@@ -4,7 +4,7 @@
 
 package godspeed_test
 
-import "github.com/PagerDuty/godspeed/v1"
+import "github.com/PagerDuty/godspeed"
 
 func ExampleNewAsync() {
 	a, err := godspeed.NewAsync(godspeed.DEFAULT_HOST, godspeed.DEFAULT_PORT, false)
@@ -12,6 +12,8 @@ func ExampleNewAsync() {
 	if err != nil {
 		// handle error
 	}
+
+	defer a.Godspeed.Conn.Close()
 
 	// add to the WaitGroup to make sure we are able to wait below
 	a.W.Add(1)
@@ -27,6 +29,8 @@ func ExampleNewDefaultAsync() {
 	if err != nil {
 		// handle error
 	}
+
+	defer a.Godspeed.Conn.Close()
 
 	a.W.Add(1)
 

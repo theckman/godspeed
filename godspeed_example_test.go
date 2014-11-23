@@ -7,7 +7,7 @@ package godspeed_test
 import (
 	"fmt"
 
-	"github.com/PagerDuty/godspeed/v1"
+	"github.com/PagerDuty/godspeed"
 )
 
 func ExampleNew() {
@@ -16,6 +16,8 @@ func ExampleNew() {
 	if err != nil {
 		// handle error
 	}
+
+	defer g.Conn.Close()
 
 	g.Gauge("example.stat", 1, nil)
 }
@@ -26,6 +28,8 @@ func ExampleNewDefault() {
 	if err != nil {
 		// handle error
 	}
+
+	defer g.Conn.Close()
 
 	g.Gauge("example.stat", 1, nil)
 }

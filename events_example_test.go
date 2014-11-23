@@ -7,7 +7,7 @@ package godspeed_test
 import (
 	"fmt"
 
-	"github.com/PagerDuty/godspeed/v1"
+	"github.com/PagerDuty/godspeed"
 )
 
 func ExampleGodspeed_Event() {

@@ -4,7 +4,7 @@
 
 package godspeed_test
 
-import "github.com/PagerDuty/godspeed/v1"
+import "github.com/PagerDuty/godspeed"
 
 func Example() {
 	// this uses the default host and port (127.0.0.1:8125)
@@ -13,6 +13,9 @@ func Example() {
 	if err != nil {
 		// handle error
 	}
+
+	// defer closing the connection
+	defer g.Conn.Close()
 
 	g.AddTags([]string{"example", "example2"})
 

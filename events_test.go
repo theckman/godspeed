@@ -29,6 +29,8 @@ func TestEvent(t *testing.T) {
 		return
 	}
 
+	defer g.Conn.Close()
+
 	//
 	// test that adding tags to both Godspeed and the Event send all tags
 	//
