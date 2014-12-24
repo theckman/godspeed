@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+var chars = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
 func randString(n uint) string {
 	b := make([]rune, n)
 

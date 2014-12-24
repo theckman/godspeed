@@ -14,8 +14,6 @@ import (
 
 const closedChan = "return channel (out) closed prematurely"
 
-var chars = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
-
 func listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
 	for {
 	NextListen:
