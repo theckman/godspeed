@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 )
 
@@ -33,8 +34,10 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 		buffer.WriteString(fmt.Sprintf("%v.", g.Namespace))
 	}
 
+	deltaStr := strconv.FormatFloat(delta, 'f', -1, 64)
+
 	// write the name of the metric to the byte buffer as well as the metric itself
-	buffer.WriteString(fmt.Sprintf("%v:%g|%v", string(trimReserved(stat)), delta, kind))
+	buffer.WriteString(fmt.Sprintf("%v:%v|%v", string(trimReserved(stat)), deltaStr, kind))
 
 	// if the sample rate is less than 1 add it too
 	if sampleRate < 1 {
