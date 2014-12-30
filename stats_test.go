@@ -104,6 +104,29 @@ func TestSend(t *testing.T) {
 	}
 
 	//
+	// test whether sending a large metric works
+	//
+	err = g.Send("testing.metric", "g", 5536650702696, 1, nil)
+
+	if err != nil {
+		t.Errorf(err.Error())
+		return
+	}
+
+	a, ok = <-out
+
+	if !ok {
+		t.Error(closedChan)
+		return
+	}
+
+	b = []byte("testing.metric:5536650702696|g")
+
+	if !bytes.Equal(a, b) {
+		t.Error(noGo(a, b))
+	}
+
+	//
 	// test whether sending a metric with a sample rate works
 	//
 	err = g.Send("testing.metric", "ms", 256.512, 0.99, nil)
