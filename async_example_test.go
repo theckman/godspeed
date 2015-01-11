@@ -7,7 +7,7 @@ package godspeed_test
 import "github.com/PagerDuty/godspeed"
 
 func ExampleNewAsync() {
-	a, err := godspeed.NewAsync(godspeed.DEFAULT_HOST, godspeed.DEFAULT_PORT, false)
+	a, err := godspeed.NewAsync(godspeed.DefaultHost, godspeed.DefaultPort, false)
 
 	if err != nil {
 		// handle error

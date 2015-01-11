@@ -104,7 +104,7 @@ func TestNewDefaultAsync(t *testing.T) {
 
 // TestAsyncAddTags tests g.AddTag() and g.AddTags()
 func TestAsyncAddTags(t *testing.T) {
-	g, err := buildAsyncGodspeed(DEFAULT_PORT, false)
+	g, err := buildAsyncGodspeed(DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -131,7 +131,7 @@ func TestAsyncAddTags(t *testing.T) {
 }
 
 func TestAsyncSetNamespace(t *testing.T) {
-	g, err := buildAsyncGodspeed(DEFAULT_PORT, false)
+	g, err := buildAsyncGodspeed(DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())
