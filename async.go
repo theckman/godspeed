@@ -39,9 +39,9 @@ func NewAsync(host string, port uint16, autoTruncate bool) (a *AsyncGodspeed, er
 	return
 }
 
-// NewDefaultAsync is just like NewAsync except it uses the DEFAULT_HOST and DEFAULT_PORT
+// NewDefaultAsync is just like NewAsync except it uses the DefaultHost and DefaultPort
 func NewDefaultAsync() (a *AsyncGodspeed, err error) {
-	a, err = NewAsync(DEFAULT_HOST, DEFAULT_PORT, false)
+	a, err = NewAsync(DefaultHost, DefaultPort, false)
 	return
 }
 

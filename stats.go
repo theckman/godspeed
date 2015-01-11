@@ -54,12 +54,12 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 	// if the buffer length is smaller than the max, just write it
 	// else if AutoTruncate is enabled truncate/write the bytes
 	// else generate an error to return
-	if buffer.Len() <= MAX_BYTES {
+	if buffer.Len() <= MaxBytes {
 		_, err = g.Conn.Write(buffer.Bytes())
 	} else if g.AutoTruncate {
-		_, err = g.Conn.Write(buffer.Bytes()[0:MAX_BYTES])
+		_, err = g.Conn.Write(buffer.Bytes()[0:MaxBytes])
 	} else {
-		err = fmt.Errorf("error sending %v, packet larger than %d (%d)", stat, MAX_BYTES, buffer.Len())
+		err = fmt.Errorf("error sending %v, packet larger than %d (%d)", stat, MaxBytes, buffer.Len())
 	}
 
 	return

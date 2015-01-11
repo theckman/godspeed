@@ -64,8 +64,8 @@ func TestSend(t *testing.T) {
 		return
 	}
 
-	if len(a) != MAX_BYTES {
-		t.Errorf("datagram is an unexpected size (%d) should be %d bytes (MAX_BYTES)", len(a), MAX_BYTES)
+	if len(a) != MaxBytes {
+		t.Errorf("datagram is an unexpected size (%d) should be %d bytes (MaxBytes)", len(a), MaxBytes)
 	}
 
 	g.Conn.Close()

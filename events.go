@@ -64,10 +64,10 @@ func (g *Godspeed) Event(title, text string, fields map[string]string, tags []st
 	// this handles the logic for truncation
 	// if the buffer length is smaller than the max, just write it
 	// else generate an error to return
-	if buf.Len() <= MAX_BYTES {
+	if buf.Len() <= MaxBytes {
 		_, err = g.Conn.Write(buf.Bytes())
 	} else {
-		err = fmt.Errorf("error sending %v, packet larger than %d (%d)", string(title), MAX_BYTES, buf.Len())
+		err = fmt.Errorf("error sending %v, packet larger than %d (%d)", string(title), MaxBytes, buf.Len())
 	}
 
 	return

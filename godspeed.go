@@ -17,15 +17,15 @@ package godspeed
 import "net"
 
 const (
-	// DEFAULT_HOST is 127.0.0.1 (localhost)
-	DEFAULT_HOST = "127.0.0.1"
+	// DefaultHost is 127.0.0.1 (localhost)
+	DefaultHost = "127.0.0.1"
 
-	// DEFAULT_PORT is 8125
-	DEFAULT_PORT uint16 = 8125
+	// DefaultPort is 8125
+	DefaultPort uint16 = 8125
 
-	// MAX_BYTES is the largest UDP datagram we will try to send
+	// MaxBytes is the largest UDP datagram we will try to send
 	// this is 8192 bytes minus the size of a UDP header
-	MAX_BYTES = 8192 - 8
+	MaxBytes = 8192 - 8
 )
 
 // Godspeed is an unbuffered Statsd client with compatability geared towards the Datadog statsd format
@@ -52,7 +52,7 @@ type Godspeed struct {
 
 // New returns a new instance of a Godspeed statsd client.
 // This method takes the host as a string, and port as a uint16.
-// There is also the ability for autoTruncate. If your metric is longer than MAX_BYTES
+// There is also the ability for autoTruncate. If your metric is longer than MaxBytes
 // autoTruncate can be used to truncate the message instead of erroring. This doesn't work
 // on events and will always return an error.
 func New(host string, port uint16, autoTruncate bool) (g *Godspeed, err error) {
@@ -74,9 +74,9 @@ func New(host string, port uint16, autoTruncate bool) (g *Godspeed, err error) {
 	return
 }
 
-// NewDefault is the same as New() except it uses DEFAULT_HOST and DEFAULT_PORT for the connection.
+// NewDefault is the same as New() except it uses DefaultHost and DefaultPort for the connection.
 func NewDefault() (g *Godspeed, err error) {
-	g, err = New(DEFAULT_HOST, DEFAULT_PORT, false)
+	g, err = New(DefaultHost, DefaultPort, false)
 	return
 }
 

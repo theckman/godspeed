@@ -18,8 +18,8 @@ func listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
 	for {
 	NextListen:
 		select {
-		case _, ctrl_ok := <-ctrl:
-			if !ctrl_ok {
+		case _, ok := <-ctrl:
+			if !ok {
 				close(c)
 				return
 			}
@@ -153,7 +153,7 @@ func TestNewDefault(t *testing.T) {
 func TestAddTag(t *testing.T) {
 	var g *Godspeed
 
-	g, err := buildGodspeed(DEFAULT_PORT, false)
+	g, err := buildGodspeed(DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -184,7 +184,7 @@ func TestAddTag(t *testing.T) {
 func TestAddTags(t *testing.T) {
 	var g *Godspeed
 
-	g, err := buildGodspeed(DEFAULT_PORT, false)
+	g, err := buildGodspeed(DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -246,7 +246,7 @@ func TestAddTags(t *testing.T) {
 func TestSetNamespace(t *testing.T) {
 	var g *Godspeed
 
-	g, err := buildGodspeed(DEFAULT_PORT, false)
+	g, err := buildGodspeed(DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())

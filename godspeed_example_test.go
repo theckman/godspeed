@@ -11,7 +11,7 @@ import (
 )
 
 func ExampleNew() {
-	g, err := godspeed.New(godspeed.DEFAULT_HOST, godspeed.DEFAULT_PORT, false)
+	g, err := godspeed.New(godspeed.DefaultHost, godspeed.DefaultPort, false)
 
 	if err != nil {
 		// handle error
