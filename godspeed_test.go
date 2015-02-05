@@ -16,7 +16,6 @@ const closedChan = "return channel (out) closed prematurely"
 
 func listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
 	for {
-	NextListen:
 		select {
 		case _, ok := <-ctrl:
 			if !ok {
@@ -29,7 +28,7 @@ func listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
 			_, err := l.Read(buffer)
 
 			if err != nil {
-				goto NextListen
+				continue
 			}
 
 			c <- bytes.Trim(buffer, "\x00")
