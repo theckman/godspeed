@@ -14,7 +14,7 @@ var eventKeys = []string{"date_happened", "hostname", "aggregation_key", "priori
 var eventMarkers = []rune{'d', 'h', 'k', 'p', 's', 't'}
 
 func escapeEvent(s string) string {
-	return strings.NewReplacer("\n", "\\\\n").Replace(s)
+	return strings.NewReplacer("\n", "\\n").Replace(s)
 }
 
 func removePipes(s string) string {

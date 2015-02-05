@@ -50,7 +50,7 @@ func TestEvent(t *testing.T) {
 		return
 	}
 
-	err = g.Event("some\nother event", "some body", nil, nil)
+	err = g.Event("some\nother event", "some\nbody", nil, nil)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -64,7 +64,7 @@ func TestEvent(t *testing.T) {
 		return
 	}
 
-	b := []byte("_e{18,9}:some\\\\nother event|some body")
+	b := []byte("_e{17,10}:some\\nother event|some\\nbody")
 
 	if !bytes.Equal(a, b) {
 		t.Error(noGo(a, b))
