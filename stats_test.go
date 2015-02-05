@@ -143,7 +143,7 @@ func TestSend(t *testing.T) {
 		return
 	}
 
-	b = []byte("testing.metric:256.512|ms|@0.990000")
+	b = []byte("testing.metric:256.512|ms|@0.99")
 
 	if !bytes.Equal(a, b) {
 		t.Error(noGo(a, b))
