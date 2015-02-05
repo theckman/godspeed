@@ -228,7 +228,7 @@ func TestAsyncSend(t *testing.T) {
 		return
 	}
 
-	b := []byte("godspeed.test.stat:42|g|@0.990000|#test0,test1,test8,test9")
+	b := []byte("godspeed.test.stat:42|g|@0.99|#test0,test1,test8,test9")
 
 	if !bytes.Equal(a, b) {
 		t.Error(noGo(a, b))

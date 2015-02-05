@@ -34,14 +34,15 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 		buffer.WriteString(fmt.Sprintf("%v.", g.Namespace))
 	}
 
-	deltaStr := strconv.FormatFloat(delta, 'f', -1, 64)
+	floatStr := strconv.FormatFloat(delta, 'f', -1, 64)
 
 	// write the name of the metric to the byte buffer as well as the metric itself
-	buffer.WriteString(fmt.Sprintf("%v:%v|%v", string(trimReserved(stat)), deltaStr, kind))
+	buffer.WriteString(fmt.Sprintf("%v:%v|%v", string(trimReserved(stat)), floatStr, kind))
 
 	// if the sample rate is less than 1 add it too
 	if sampleRate < 1 {
-		buffer.WriteString(fmt.Sprintf("|@%f", sampleRate))
+		floatStr = strconv.FormatFloat(sampleRate, 'f', -1, 64)
+		buffer.WriteString(fmt.Sprintf("|@%v", floatStr))
 	}
 
 	// add any provided tags to the metric
