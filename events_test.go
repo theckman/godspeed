@@ -2,27 +2,30 @@
 // Use of this source code is governed by the BSD 3-Clause
 // license that can be found in the LICENSE file.
 
-package godspeed
+package godspeed_test
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/PagerDuty/godspeed"
+	"github.com/PagerDuty/godspeed/gspdtest"
 )
 
 func TestEvent(t *testing.T) {
 	const port uint16 = 8125
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -67,7 +70,7 @@ func TestEvent(t *testing.T) {
 	b := []byte("_e{17,10}:some\\nother event|some\\nbody")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -115,7 +118,7 @@ func TestEvent(t *testing.T) {
 	b = []byte(fmt.Sprintf("_e{1,1}:a|b|d:%d", unix))
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -141,7 +144,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:b|c|h:test01")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -167,7 +170,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:c|d|k:xyz")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -193,7 +196,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:d|e|p:low")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -219,7 +222,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:e|f|s:cassandra")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -245,7 +248,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:f|g|t:info")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -276,7 +279,7 @@ func TestEvent(t *testing.T) {
 	b = []byte(fmt.Sprintf("_e{1,1}:g|h|d:%d|h:test01|k:xyz|p:low|s:cassandra|t:info", unix))
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	m = nil
@@ -301,7 +304,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:h|i|#test8,test9")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -331,7 +334,7 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:i|j|#test0,test1")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -354,6 +357,6 @@ func TestEvent(t *testing.T) {
 	b = []byte("_e{1,1}:j|k|#test0,test1,test8,test9")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 }

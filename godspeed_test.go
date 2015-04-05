@@ -2,66 +2,21 @@
 // Use of this source code is governed by the BSD 3-Clause
 // license that can be found in the LICENSE file.
 
-package godspeed
+package godspeed_test
 
 import (
 	"bytes"
-	"fmt"
 	"net"
 	"strings"
 	"testing"
+
+	"github.com/PagerDuty/godspeed"
+	"github.com/PagerDuty/godspeed/gspdtest"
 )
 
 const closedChan = "return channel (out) closed prematurely"
 
-func listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
-	for {
-		select {
-		case _, ok := <-ctrl:
-			if !ok {
-				close(c)
-				return
-			}
-		default:
-			buffer := make([]byte, 8193)
-
-			_, err := l.Read(buffer)
-
-			if err != nil {
-				continue
-			}
-
-			c <- bytes.Trim(buffer, "\x00")
-		}
-	}
-}
-
-func buildListener(port uint16) (*net.UDPConn, chan int, chan []byte) {
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("127.0.0.1:%d", port))
-
-	if err != nil {
-		panic(fmt.Sprintf("getting address for test listener failed, bailing out. Here's everything I know: %v", err))
-	}
-
-	l, err := net.ListenUDP("udp", addr)
-
-	if err != nil {
-		panic(fmt.Sprintf("unable to listen for traffic: %v", err))
-	}
-
-	return l, make(chan int), make(chan []byte)
-}
-
-func buildGodspeed(port uint16, autoTruncate bool) (g *Godspeed, err error) {
-	g, err = New("127.0.0.1", port, autoTruncate)
-	return
-}
-
-func noGo(a, b []byte) string {
-	return fmt.Sprintf("%v (%v) is not equal to %v (%v)", string(a), a, string(b), b)
-}
-
-func testBasicFunctionality(t *testing.T, g *Godspeed, l *net.UDPConn, ctrl chan int, out chan []byte) {
+func testBasicFunctionality(t *testing.T, g *godspeed.Godspeed, l *net.UDPConn, ctrl chan int, out chan []byte) {
 	err := g.Send("test.metric", "c", 1, 1, nil)
 
 	if err != nil {
@@ -82,7 +37,7 @@ func testBasicFunctionality(t *testing.T, g *Godspeed, l *net.UDPConn, ctrl chan
 	b := []byte("test.metric:1|c")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	if len(g.Tags) != 0 {
@@ -97,21 +52,21 @@ func testBasicFunctionality(t *testing.T, g *Godspeed, l *net.UDPConn, ctrl chan
 func TestNew(t *testing.T) {
 	// define port for listener
 	const port uint16 = 8126
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
 	// build the listener and return the following:
 	// listener, control channel (close to stop), and the out (return) channel
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	// defer cleaning up stuff
 	defer l.Close()
 	defer close(ctrl)
 
 	// send the listener out to a goroutine
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
 	// build Godspeed
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		// we failed to get a Godspeed client
@@ -128,16 +83,16 @@ func TestNew(t *testing.T) {
 
 func TestNewDefault(t *testing.T) {
 	const port uint16 = 8125
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := NewDefault()
+	g, err := godspeed.NewDefault()
 
 	if err != nil {
 		t.Errorf("unexpected error when building new Godspeed client: %v", err)
@@ -150,9 +105,9 @@ func TestNewDefault(t *testing.T) {
 }
 
 func TestAddTag(t *testing.T) {
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	g, err := buildGodspeed(DefaultPort, false)
+	g, err := gspdtest.BuildGodspeed(godspeed.DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -181,9 +136,9 @@ func TestAddTag(t *testing.T) {
 }
 
 func TestAddTags(t *testing.T) {
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	g, err := buildGodspeed(DefaultPort, false)
+	g, err := gspdtest.BuildGodspeed(godspeed.DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -243,9 +198,9 @@ func TestAddTags(t *testing.T) {
 }
 
 func TestSetNamespace(t *testing.T) {
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	g, err := buildGodspeed(DefaultPort, false)
+	g, err := gspdtest.BuildGodspeed(godspeed.DefaultPort, false)
 
 	if err != nil {
 		t.Error(err.Error())

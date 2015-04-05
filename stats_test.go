@@ -2,12 +2,15 @@
 // Use of this source code is governed by the BSD 3-Clause
 // license that can be found in the LICENSE file.
 
-package godspeed
+package godspeed_test
 
 import (
 	"bytes"
 	"math/rand"
 	"testing"
+
+	"github.com/PagerDuty/godspeed"
+	"github.com/PagerDuty/godspeed/gspdtest"
 )
 
 var chars = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
@@ -24,17 +27,17 @@ func randString(n uint) string {
 
 func TestSend(t *testing.T) {
 	const port uint16 = 8127
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
 	// build a new Godspeed instance with autoTruncation set to true
-	g, err := buildGodspeed(port, true)
+	g, err := gspdtest.BuildGodspeed(port, true)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -64,14 +67,14 @@ func TestSend(t *testing.T) {
 		return
 	}
 
-	if len(a) != MaxBytes {
-		t.Errorf("datagram is an unexpected size (%d) should be %d bytes (MaxBytes)", len(a), MaxBytes)
+	if len(a) != godspeed.MaxBytes {
+		t.Errorf("datagram is an unexpected size (%d) should be %d bytes (MaxBytes)", len(a), godspeed.MaxBytes)
 	}
 
 	g.Conn.Close()
 
 	// build a new Godspeed instance with autoTruncation set to false
-	g, err = buildGodspeed(port, false)
+	g, err = gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -100,7 +103,7 @@ func TestSend(t *testing.T) {
 	b := []byte("testing.metric:256.512|ms")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -123,7 +126,7 @@ func TestSend(t *testing.T) {
 	b = []byte("testing.metric:5536650702696|g")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -146,7 +149,7 @@ func TestSend(t *testing.T) {
 	b = []byte("testing.metric:256.512|ms|@0.99")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -171,7 +174,7 @@ func TestSend(t *testing.T) {
 	b = []byte("godspeed.testing.metric:512.1024|ms")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -196,7 +199,7 @@ func TestSend(t *testing.T) {
 	b = []byte("godspeed.testing.metric:512.1024|ms|#test")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -221,7 +224,7 @@ func TestSend(t *testing.T) {
 	b = []byte("godspeed.testing.metric:512.1024|ms|#test,test1")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -246,7 +249,7 @@ func TestSend(t *testing.T) {
 	b = []byte("godspeed.testing.metric:512.1024|ms|#test,test1,test2,test3")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -269,7 +272,7 @@ func TestSend(t *testing.T) {
 	b = []byte("godspeed.testing.metric:512.1024|ms|#test,test1,test2,test3,test4,test5")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -292,7 +295,7 @@ func TestSend(t *testing.T) {
 	b = []byte("godspeed.testing.metric:512.1024|ms|#test,test1,test2,test3")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 	//
@@ -311,16 +314,16 @@ func TestSend(t *testing.T) {
 
 func TestCount(t *testing.T) {
 	const port uint16 = 8128
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -346,22 +349,22 @@ func TestCount(t *testing.T) {
 	b := []byte("test.count:1|c")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 }
 
 func TestIncr(t *testing.T) {
 	const port uint16 = 8129
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -387,22 +390,22 @@ func TestIncr(t *testing.T) {
 	b := []byte("test.incr:1|c")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 }
 
 func TestDecr(t *testing.T) {
 	const port uint16 = 8130
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -428,22 +431,22 @@ func TestDecr(t *testing.T) {
 	b := []byte("test.decr:-1|c")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 }
 
 func TestGauge(t *testing.T) {
 	const port uint16 = 8131
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -469,23 +472,23 @@ func TestGauge(t *testing.T) {
 	b := []byte("test.gauge:42|g")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 }
 
 func TestHistogram(t *testing.T) {
 	const port uint16 = 8130
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -511,23 +514,23 @@ func TestHistogram(t *testing.T) {
 	b := []byte("test.hist:84|h")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 }
 
 func TestTiming(t *testing.T) {
 	const port uint16 = 8130
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -553,23 +556,23 @@ func TestTiming(t *testing.T) {
 	b := []byte("test.timing:2054|ms")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 }
 
 func TestSet(t *testing.T) {
 	const port uint16 = 8130
-	var g *Godspeed
+	var g *godspeed.Godspeed
 
-	l, ctrl, out := buildListener(port)
+	l, ctrl, out := gspdtest.BuildListener(port)
 
 	defer l.Close()
 	defer close(ctrl)
 
-	go listener(l, ctrl, out)
+	go gspdtest.Listener(l, ctrl, out)
 
-	g, err := buildGodspeed(port, false)
+	g, err := gspdtest.BuildGodspeed(port, false)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -595,7 +598,7 @@ func TestSet(t *testing.T) {
 	b := []byte("test.set:10|s")
 
 	if !bytes.Equal(a, b) {
-		t.Error(noGo(a, b))
+		t.Error(gspdtest.NoGo(a, b))
 	}
 
 }
