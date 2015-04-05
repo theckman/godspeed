@@ -7,7 +7,7 @@ The name `godspeed` is a bit of a rhyming slang twist on DogStatsD. It's also a
 poke at the fact that the statsd protocol's transport mechanism is UDP...
 
 Check out [GoDoc](https://godoc.org/github.com/PagerDuty/godspeed) for the docs
-as well as some examples. Some usage information will be added to this README soon.
+as well as some examples.
 
 DogStatsD is a copyright of `Datadog <info@datadoghq.com>`.
 
