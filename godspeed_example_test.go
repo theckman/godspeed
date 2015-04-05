@@ -19,7 +19,11 @@ func ExampleNew() {
 
 	defer g.Conn.Close()
 
-	g.Gauge("example.stat", 1, nil)
+	err = g.Gauge("example.stat", 1, nil)
+
+	if err != nil {
+		// handle error
+	}
 }
 
 func ExampleNewDefault() {
@@ -38,6 +42,8 @@ func ExampleGodspeed_AddTag() {
 	// be sure to handle the error
 	g, _ := godspeed.NewDefault()
 
+	defer g.Conn.Close()
+
 	g.AddTag("example1")
 
 	tags := g.AddTag("example2")
@@ -49,6 +55,8 @@ func ExampleGodspeed_AddTag() {
 func ExampleGodspeed_AddTags() {
 	g, _ := godspeed.NewDefault()
 
+	defer g.Conn.Close()
+
 	newTags := []string{"production", "example"}
 
 	tags := g.AddTags(newTags)
@@ -59,6 +67,8 @@ func ExampleGodspeed_AddTags() {
 
 func ExampleGodspeed_SetNamespace() {
 	g, _ := godspeed.NewDefault()
+
+	defer g.Conn.Close()
 
 	namespace := "example"
 

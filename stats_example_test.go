@@ -13,6 +13,8 @@ func ExampleGodspeed_Send() {
 		// handle error
 	}
 
+	defer g.Conn.Close()
+
 	tags := []string{"example"}
 
 	err = g.Send("example.stat", "g", 1, 1, tags)
@@ -29,6 +31,8 @@ func ExampleGodspeed_Count() {
 		// handle error
 	}
 
+	defer g.Conn.Close()
+
 	err = g.Count("example.count", 1, nil)
 
 	if err != nil {
@@ -38,6 +42,8 @@ func ExampleGodspeed_Count() {
 
 func ExampleGodspeed_Incr() {
 	g, _ := godspeed.NewDefault()
+
+	defer g.Conn.Close()
 
 	err := g.Incr("example.counter", nil)
 
@@ -52,6 +58,8 @@ func ExampleGodspeed_Gauge() {
 	if err != nil {
 		// handle error
 	}
+
+	defer g.Conn.Close()
 
 	err = g.Gauge("example.gauge", 1, nil)
 

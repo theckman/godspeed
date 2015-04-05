@@ -42,6 +42,8 @@ func ExampleNewDefaultAsync() {
 func ExampleAsyncGodspeed_Event() {
 	a, _ := godspeed.NewDefaultAsync()
 
+	defer g.Godspeed.Conn.Close()
+
 	a.W.Add(1)
 
 	go a.Event("example event", "something happened", nil, nil, a.W)
@@ -51,6 +53,8 @@ func ExampleAsyncGodspeed_Event() {
 
 func ExampleAsyncGodspeed_Send() {
 	a, _ := godspeed.NewDefaultAsync()
+
+	defer g.Godspeed.Conn.Close()
 
 	a.W.Add(1)
 
@@ -62,6 +66,8 @@ func ExampleAsyncGodspeed_Send() {
 func ExampleAsyncGodspeed_Count() {
 	a, _ := godspeed.NewDefaultAsync()
 
+	defer g.Godspeed.Conn.Close()
+
 	a.W.Add(1)
 
 	go a.Count("example.count", 42, nil, a.W)
@@ -71,6 +77,8 @@ func ExampleAsyncGodspeed_Count() {
 
 func ExampleAsyncGodspeed_Gauge() {
 	a, _ := godspeed.NewDefaultAsync()
+
+	defer g.Godspeed.Conn.Close()
 
 	a.W.Add(1)
 

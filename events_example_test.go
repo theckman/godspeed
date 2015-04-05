@@ -14,6 +14,8 @@ func ExampleGodspeed_Event() {
 	// make sure to handle the error
 	g, _ := godspeed.NewDefault()
 
+	defer g.Conn.Close()
+
 	title := "Nginx service restart"
 	text := "The Nginx service has been restarted"
 
@@ -21,8 +23,9 @@ func ExampleGodspeed_Event() {
 	// http://docs.datadoghq.com/guides/dogstatsd/#fields
 	optionals := make(map[string]string)
 	optionals["alert_type"] = "info"
+	optionals["source_type_name"] = "nginx"
 
-	addlTags := []string{"nginx"}
+	addlTags := []string{"source_type:nginx"}
 
 	err := g.Event(title, text, optionals, addlTags)
 
