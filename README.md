@@ -22,7 +22,7 @@ go get -u github.com/PagerDuty/godspeed
 
 ## Usage
 For more details either look at the `_example_test.go` files directly or view
-the examples on [GoDoc](https://godoc.org/github.com/PagerDuty/godspeed).
+the examples on [GoDoc](https://godoc.org/github.com/PagerDuty/godspeed#pkg-examples).
 
 ### Emitting a gauge
 ```Go
