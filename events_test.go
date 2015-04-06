@@ -5,93 +5,55 @@
 package godspeed_test
 
 import (
-	"bytes"
 	"fmt"
-	"testing"
 	"time"
 
-	"github.com/PagerDuty/godspeed"
-	"github.com/PagerDuty/godspeed/gspdtest"
+	// this is *C comes from
+	. "gopkg.in/check.v1"
 )
 
-func TestEvent(t *testing.T) {
-	const port uint16 = 8125
-	var g *godspeed.Godspeed
-
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Conn.Close()
-
+func (t *TestSuite) TestEvent(c *C) {
 	//
 	// test that adding tags to both Godspeed and the Event send all tags
 	//
+
 	//
 	// test whether length validation works
 	//
-	body := make([]byte, 8192)
+	body := make([]byte, 8200)
 
 	for i := range body {
 		body[i] = 'a'
 	}
 
-	err = g.Event("some event", string(body), nil, nil)
-
-	if err == nil {
-		t.Error("expected error not seen; this should have caused a message length error")
-		return
-	}
-
-	err = g.Event("some\nother event", "some\nbody", nil, nil)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
-
-	b := []byte("_e{17,10}:some\\nother event|some\\nbody")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	err := t.g.Event("some event", string(body), nil, nil)
+	c.Check(err, Not(IsNil))
 
 	//
 	// test whether title validation works
 	//
-	err = g.Event("", "s", nil, nil)
-
-	// if the title's len is < 1, we should get an error
-	if err.Error() != "title must have at least one character" {
-		t.Error("expected Event validation to fail due to invalid title")
-	}
+	err = t.g.Event("", "s", nil, nil)
+	c.Assert(err, Not(IsNil))
+	c.Check(err.Error(), Equals, "title must have at least one character")
 
 	//
 	// test whether body validation works
 	//
-	err = g.Event("s", "", nil, nil)
+	err = t.g.Event("s", "", nil, nil)
+	c.Assert(err, Not(IsNil))
+	c.Check(err.Error(), Equals, "body must have at least one character")
 
-	// if the body's len is < 1, we should get an error
-	if err.Error() != "body must have at least one character" {
-		t.Error("expectefd Event() validation to fail due to invalid body")
-	}
+	//
+	// general tests
+	//
+	err = t.g.Event("some\nother event", "some\nbody", nil, nil)
+	c.Assert(err, IsNil)
+
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
+
+	b := []byte("_e{17,10}:some\\nother event|some\\nbody")
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that 'date_happened' value gets passed
@@ -101,25 +63,14 @@ func TestEvent(t *testing.T) {
 	m := make(map[string]string)
 	m["date_happened"] = fmt.Sprintf("%d", unix)
 
-	err = g.Event("a", "b", m, nil)
+	err = t.g.Event("a", "b", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte(fmt.Sprintf("_e{1,1}:a|b|d:%d", unix))
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that 'hostname' value gets passed
@@ -127,25 +78,14 @@ func TestEvent(t *testing.T) {
 	m = make(map[string]string)
 	m["hostname"] = "tes|t01"
 
-	err = g.Event("b", "c", m, nil)
+	err = t.g.Event("b", "c", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:b|c|h:test01")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that 'aggregation_key' value gets passed
@@ -153,25 +93,14 @@ func TestEvent(t *testing.T) {
 	m = make(map[string]string)
 	m["aggregation_key"] = "xyz"
 
-	err = g.Event("c", "d", m, nil)
+	err = t.g.Event("c", "d", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:c|d|k:xyz")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that 'priority' value gets passed
@@ -179,25 +108,14 @@ func TestEvent(t *testing.T) {
 	m = make(map[string]string)
 	m["priority"] = "low"
 
-	err = g.Event("d", "e", m, nil)
+	err = t.g.Event("d", "e", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:d|e|p:low")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that 'source_type_name' value gets passed
@@ -205,25 +123,14 @@ func TestEvent(t *testing.T) {
 	m = make(map[string]string)
 	m["source_type_name"] = "cassandra"
 
-	err = g.Event("e", "f", m, nil)
+	err = t.g.Event("e", "f", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:e|f|s:cassandra")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that 'alert_type' value gets passed
@@ -231,25 +138,14 @@ func TestEvent(t *testing.T) {
 	m = make(map[string]string)
 	m["alert_type"] = "info"
 
-	err = g.Event("f", "g", m, nil)
+	err = t.g.Event("f", "g", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:f|g|t:info")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that adding all values makes sure that all get passed
@@ -262,101 +158,51 @@ func TestEvent(t *testing.T) {
 	m["source_type_name"] = "cassandra"
 	m["alert_type"] = "info"
 
-	err = g.Event("g", "h", m, nil)
+	err = t.g.Event("g", "h", m, nil)
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte(fmt.Sprintf("_e{1,1}:g|h|d:%d|h:test01|k:xyz|p:low|s:cassandra|t:info", unix))
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
-
-	m = nil
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that adding tags only to the event works
 	//
-	err = g.Event("h", "i", nil, []string{"test8", "test9"})
+	err = t.g.Event("h", "i", nil, []string{"test8", "test9"})
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:h|i|#test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that adding the tags to the Godspeed instance sends them with the event
 	//
-	tgs := g.AddTags([]string{"test0", "test1"})
+	t.g.AddTags([]string{"test0", "test1"})
+	c.Assert(len(t.g.Tags), Equals, 2)
 
-	if len(tgs) != 2 {
-		t.Errorf("expected there to be 2 tags, there are %d", len(tgs))
-		return
-	}
+	err = t.g.Event("i", "j", nil, nil)
+	c.Assert(err, IsNil)
 
-	err = g.Event("i", "j", nil, nil)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:i|j|#test0,test1")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 
 	//
 	// test that adding tags to both Godspeed and the Event send all tags
 	//
-	err = g.Event("j", "k", nil, []string{"test8", "test9"})
+	err = t.g.Event("j", "k", nil, []string{"test8", "test9"})
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	a, ok = <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok = <-t.o
+	c.Assert(ok, Equals, true)
 
 	b = []byte("_e{1,1}:j|k|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
