@@ -301,13 +301,15 @@ func TestSend(t *testing.T) {
 	//
 	// test that a failure is returned when autoTruncate is false, and the body is larger than MAX_BYTES
 	//
-	for i := 0; i < 2078; i++ {
+	for i := 0; i < 2100; i++ {
 		g.AddTag(randString(3))
 	}
 
 	err = g.Send("test.metric", "c", 42, 1, nil)
 
 	if err == nil {
+		// pull the message out of the return channel and discard
+		_ = <-out
 		t.Error("expected error; autoTruncate should be diabled/message should have been too long")
 	}
 }

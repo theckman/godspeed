@@ -5,172 +5,111 @@
 package godspeed_test
 
 import (
-	"bytes"
 	"fmt"
 	"net"
-	"testing"
 	"time"
 
 	"github.com/PagerDuty/godspeed"
 	"github.com/PagerDuty/godspeed/gspdtest"
+
+	// this is *C comes from
+	. "gopkg.in/check.v1"
 )
 
 var extraTestTags = []string{"test8", "test9"}
 
-func buildAsyncGodspeed(port uint16, autoTruncate bool) (g *godspeed.AsyncGodspeed, err error) {
-	g, err = godspeed.NewAsync("127.0.0.1", port, autoTruncate)
-	return
+type ATestSuite struct {
+	g *godspeed.AsyncGodspeed
+	l *net.UDPConn
+	c chan int
+	o chan []byte
 }
 
-func testAsyncBasicFunctionality(t *testing.T, g *godspeed.AsyncGodspeed, l *net.UDPConn, ctrl chan int, out chan []byte) {
+var _ = Suite(&ATestSuite{})
+
+func (t *ATestSuite) SetUpTest(c *C) {
+	gs, err := godspeed.NewDefaultAsync()
+	c.Assert(err, IsNil)
+	t.g = gs
+
+	t.g.SetNamespace("godspeed")
+	t.g.AddTags([]string{"test0", "test1"})
+
+	t.l, t.c, t.o = gspdtest.BuildListener(8125)
+	go gspdtest.Listener(t.l, t.c, t.o)
+}
+
+func (t *ATestSuite) TearDownTest(c *C) {
+	t.l.Close()
+	close(t.c)
+	t.g.Godspeed.Conn.Close()
+}
+
+func testAsyncBasicFunc(t *ATestSuite, c *C, g *godspeed.AsyncGodspeed) {
 	g.AddTag("test0")
 	g.SetNamespace("godspeed")
 
 	g.W.Add(1)
 	go g.Send("test.metric", "c", 1, 1, []string{"test1", "test2"}, g.W)
 
-	a, ok := <-out
-
-	if !ok {
-		// error and return as there is no reason to run further tests
-		// they will most likely fail as this channel has been closed early
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.metric:1|c|#test0,test1,test2")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
+	c.Check(len(g.Godspeed.Tags), Equals, 1)
+	c.Check(g.Godspeed.Namespace, Equals, "godspeed")
 }
 
-func testWarmUp(a *godspeed.AsyncGodspeed) {
-	a.SetNamespace("godspeed")
-	a.AddTags([]string{"test0", "test1"})
-}
-
-func TestNewAsync(t *testing.T) {
-	// define port for listener
-	const port uint16 = 8126
+func (t *ATestSuite) TestNewAsync(c *C) {
 	var g *godspeed.AsyncGodspeed
+	g, err := godspeed.NewAsync("127.0.0.1", 8125, false)
+	c.Assert(err, IsNil)
 
-	// build the listener and return the following:
-	// listener, control channel (close to stop), and the out (return) channel
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	// defer cleaning up stuff
-	defer l.Close()
-	defer close(ctrl)
-
-	// send the listener out to a goroutine
-	go gspdtest.Listener(l, ctrl, out)
-
-	// build Godspeed
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		// we failed to get a Godspeed client
-		t.Error(err.Error())
-		return
-	}
-
-	// defer closing the client for Godspeed
 	defer g.Godspeed.Conn.Close()
 
-	// test defined basic functionality
-	testAsyncBasicFunctionality(t, g, l, ctrl, out)
+	testAsyncBasicFunc(t, c, g)
 }
 
-func TestNewDefaultAsync(t *testing.T) {
-	const port uint16 = 8125
+func (t *ATestSuite) TestNewDefaultAsync(c *C) {
 	var g *godspeed.AsyncGodspeed
-
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
 	g, err := godspeed.NewDefaultAsync()
-
-	if err != nil {
-		t.Errorf("unexpected error when building new Godspeed client: %v", err)
-		return
-	}
+	c.Assert(err, IsNil)
 
 	defer g.Godspeed.Conn.Close()
 
-	testAsyncBasicFunctionality(t, g, l, ctrl, out)
+	testAsyncBasicFunc(t, c, g)
 }
 
-// TestAsyncAddTags tests g.AddTag() and g.AddTags()
-func TestAsyncAddTags(t *testing.T) {
-	g, err := gspdtest.BuildAsyncGodspeed(godspeed.DefaultPort, false)
+func (t *ATestSuite) TestAsyncAddTags(c *C) {
+	var g *godspeed.AsyncGodspeed
+	g, err := godspeed.NewDefaultAsync()
+	c.Assert(err, IsNil)
 
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
+	c.Assert(len(g.Godspeed.Tags), Equals, 0)
 
 	g.AddTag("testing0")
+	c.Assert(len(g.Godspeed.Tags), Equals, 1)
+	c.Check(g.Godspeed.Tags[0], Equals, "testing0")
 
-	tags := g.Godspeed.Tags
-
-	if len(tags) != 1 && tags[0] != "testing0" {
-		t.Error("failed adding 'testing0' tag to client")
-	}
-
-	g.AddTags([]string{"testing1", "testing2"})
-
-	tags = g.Godspeed.Tags
-
-	if len(tags) != 3 && tags[0] != "testing0" && tags[1] != "testing1" && tags[2] != "testing3" {
-		t.Error("failed to add 'testing1' and 'testing2' to the tags")
-	}
+	g.AddTags([]string{"testing1", "testing2", "testing0"})
+	c.Assert(len(g.Godspeed.Tags), Equals, 3)
+	c.Check(g.Godspeed.Tags[0], Equals, "testing0")
+	c.Check(g.Godspeed.Tags[1], Equals, "testing1")
+	c.Check(g.Godspeed.Tags[2], Equals, "testing2")
 }
 
-func TestAsyncSetNamespace(t *testing.T) {
-	g, err := gspdtest.BuildAsyncGodspeed(godspeed.DefaultPort, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	g.SetNamespace("testing1")
-
-	if g.Godspeed.Namespace != "testing1" {
-		t.Error("failed to set the namespace")
-	}
-}
-
-func TestAsyncEvent(t *testing.T) {
-	const port uint16 = 8125
+func (t *ATestSuite) TestSetNamespace(c *C) {
 	var g *godspeed.AsyncGodspeed
+	g, err := godspeed.NewDefaultAsync()
+	c.Assert(err, IsNil)
+	c.Check(g.Godspeed.Namespace, Equals, "")
+	g.SetNamespace("heckman")
+	c.Check(g.Godspeed.Namespace, Equals, "heckman")
+}
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	g.AddTags([]string{"test0", "test1"})
+func (t *ATestSuite) TestAsyncEvent(c *C) {
+	t.g.AddTags([]string{"test0", "test1"})
 
 	unix := time.Now().Unix()
 
@@ -182,330 +121,100 @@ func TestAsyncEvent(t *testing.T) {
 	m["source_type_name"] = "cassandra"
 	m["alert_type"] = "info"
 
-	g.W.Add(1)
-	go g.Event("a", "b", m, []string{"test8", "test9"}, g.W)
+	t.g.W.Add(1)
+	go t.g.Event("a", "b", m, []string{"test8", "test9"}, t.g.W)
 
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte(fmt.Sprintf("_e{1,1}:a|b|d:%d|h:test01|k:xyz|p:low|s:cassandra|t:info|#test0,test1,test8,test9", unix))
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncSend(t *testing.T) {
-	const port uint16 = 8126
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncSend(c *C) {
+	t.g.W.Add(1)
+	go t.g.Send("test.stat", "g", 42, 0.99, extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Send("test.stat", "g", 42, 0.99, extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.stat:42|g|@0.99|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncCount(t *testing.T) {
-	const port uint16 = 8127
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncCount(c *C) {
+	t.g.W.Add(1)
+	go t.g.Count("test.count", 1, extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Count("test.count", 1, extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.count:1|c|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncIncr(t *testing.T) {
-	const port uint16 = 8128
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncIncr(c *C) {
+	t.g.W.Add(1)
+	go t.g.Incr("test.incr", extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Incr("test.incr", extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.incr:1|c|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncDecr(t *testing.T) {
-	const port uint16 = 8129
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncDecr(c *C) {
+	t.g.W.Add(1)
+	go t.g.Decr("test.decr", extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Decr("test.decr", extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.decr:-1|c|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncGauge(t *testing.T) {
-	const port uint16 = 8130
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncGauge(c *C) {
+	t.g.W.Add(1)
+	go t.g.Gauge("test.gauge", 42, extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Gauge("test.gauge", 42, extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.gauge:42|g|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncHistogram(t *testing.T) {
-	const port uint16 = 8131
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncHistogram(c *C) {
+	t.g.W.Add(1)
+	go t.g.Histogram("test.hist", 2, extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Histogram("test.hist", 2, extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.hist:2|h|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncTiming(t *testing.T) {
-	const port uint16 = 8132
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncTiming(c *C) {
+	t.g.W.Add(1)
+	go t.g.Timing("test.timing", 3, extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Timing("test.timing", 3, extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.timing:3|ms|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
 
-func TestAsyncSet(t *testing.T) {
-	const port uint16 = 8133
-	var g *godspeed.AsyncGodspeed
+func (t *ATestSuite) TestAsyncSet(c *C) {
+	t.g.W.Add(1)
+	go t.g.Set("test.set", 4, extraTestTags, t.g.W)
 
-	l, ctrl, out := gspdtest.BuildListener(port)
-
-	defer l.Close()
-	defer close(ctrl)
-
-	go gspdtest.Listener(l, ctrl, out)
-
-	g, err := gspdtest.BuildAsyncGodspeed(port, false)
-
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	defer g.Godspeed.Conn.Close()
-
-	testWarmUp(g)
-
-	g.W.Add(1)
-	go g.Set("test.set", 4, extraTestTags, g.W)
-
-	a, ok := <-out
-
-	if !ok {
-		t.Error(closedChan)
-		return
-	}
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
 
 	b := []byte("godspeed.test.set:4|s|#test0,test1,test8,test9")
-
-	if !bytes.Equal(a, b) {
-		t.Error(gspdtest.NoGo(a, b))
-	}
+	c.Check(string(a), Equals, string(b))
 }
