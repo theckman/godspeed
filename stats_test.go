@@ -8,7 +8,6 @@ import (
 	"math/rand"
 
 	"github.com/PagerDuty/godspeed"
-	"github.com/PagerDuty/godspeed/gspdtest"
 
 	// this is *C comes from
 	. "gopkg.in/check.v1"
@@ -27,7 +26,7 @@ func randString(n uint) string {
 }
 
 func (t *TestSuite) TestSend(c *C) {
-	gs, err := gspdtest.BuildGodspeed(8125, true)
+	gs, err := godspeed.New("127.0.0.1", 8125, true)
 	c.Assert(err, IsNil)
 
 	//
