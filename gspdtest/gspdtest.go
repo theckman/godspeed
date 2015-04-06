@@ -8,8 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"net"
-
-	"github.com/PagerDuty/godspeed"
 )
 
 func Listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
@@ -48,18 +46,4 @@ func BuildListener(port uint16) (*net.UDPConn, chan int, chan []byte) {
 	}
 
 	return l, make(chan int), make(chan []byte)
-}
-
-func BuildGodspeed(port uint16, autoTruncate bool) (g *godspeed.Godspeed, err error) {
-	g, err = godspeed.New("127.0.0.1", port, autoTruncate)
-	return
-}
-
-func BuildAsyncGodspeed(port uint16, autoTruncate bool) (g *godspeed.AsyncGodspeed, err error) {
-	g, err = godspeed.NewAsync("127.0.0.1", port, autoTruncate)
-	return
-}
-
-func NoGo(a, b []byte) string {
-	return fmt.Sprintf("%v (%v) is not equal to %v (%v)", string(a), a, string(b), b)
 }
