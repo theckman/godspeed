@@ -28,10 +28,6 @@ type TestSuite struct {
 
 var _ = Suite(&TestSuite{})
 
-// func (t *TestSuite) SetUpSuite(c *C) {}
-
-// func (t *TestSuite) TearDownSuite(c *C) {}
-
 func (t *TestSuite) SetUpTest(c *C) {
 	gs, err := godspeed.NewDefault()
 	c.Assert(err, IsNil)
@@ -45,14 +41,13 @@ func (t *TestSuite) TearDownTest(c *C) {
 	t.l.Close()
 	close(t.c)
 	t.g.Conn.Close()
-	// time.Sleep(time.Millisecond * 5)
 }
 
-func testBasicFunc(c *C, g *godspeed.Godspeed, l *net.UDPConn, ctrl chan int, out chan []byte) {
+func testBasicFunc(t *TestSuite, c *C, g *godspeed.Godspeed) {
 	err := g.Send("test.metric", "c", 1, 1, nil)
 	c.Assert(err, IsNil)
 
-	a, ok := <-out
+	a, ok := <-t.o
 	c.Assert(ok, Equals, true)
 
 	b := []byte("test.metric:1|c")
@@ -70,7 +65,7 @@ func (t *TestSuite) TestNew(c *C) {
 	defer g.Conn.Close()
 
 	// test defined basic functionality
-	testBasicFunc(c, g, t.l, t.c, t.o)
+	testBasicFunc(t, c, g)
 }
 
 func (t *TestSuite) TestNewDefault(c *C) {
@@ -80,7 +75,7 @@ func (t *TestSuite) TestNewDefault(c *C) {
 
 	defer g.Conn.Close()
 
-	testBasicFunc(c, g, t.l, t.c, t.o)
+	testBasicFunc(t, c, g)
 }
 
 func (t *TestSuite) TestAddTag(c *C) {
