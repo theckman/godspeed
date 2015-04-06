@@ -51,9 +51,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok := <-t.o
 	c.Assert(ok, Equals, true)
-
-	b := []byte("_e{17,10}:some\\nother event|some\\nbody")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{17,10}:some\\nother event|some\\nbody")
 
 	//
 	// test that 'date_happened' value gets passed
@@ -68,9 +66,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte(fmt.Sprintf("_e{1,1}:a|b|d:%d", unix))
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, fmt.Sprintf("_e{1,1}:a|b|d:%d", unix))
 
 	//
 	// test that 'hostname' value gets passed
@@ -83,9 +79,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:b|c|h:test01")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:b|c|h:test01")
 
 	//
 	// test that 'aggregation_key' value gets passed
@@ -98,9 +92,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:c|d|k:xyz")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:c|d|k:xyz")
 
 	//
 	// test that 'priority' value gets passed
@@ -113,9 +105,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:d|e|p:low")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:d|e|p:low")
 
 	//
 	// test that 'source_type_name' value gets passed
@@ -128,9 +118,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:e|f|s:cassandra")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:e|f|s:cassandra")
 
 	//
 	// test that 'alert_type' value gets passed
@@ -143,9 +131,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:f|g|t:info")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:f|g|t:info")
 
 	//
 	// test that adding all values makes sure that all get passed
@@ -163,9 +149,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte(fmt.Sprintf("_e{1,1}:g|h|d:%d|h:test01|k:xyz|p:low|s:cassandra|t:info", unix))
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, fmt.Sprintf("_e{1,1}:g|h|d:%d|h:test01|k:xyz|p:low|s:cassandra|t:info", unix))
 
 	//
 	// test that adding tags only to the event works
@@ -175,9 +159,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:h|i|#test8,test9")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:h|i|#test8,test9")
 
 	//
 	// test that adding the tags to the Godspeed instance sends them with the event
@@ -190,9 +172,7 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:i|j|#test0,test1")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:i|j|#test0,test1")
 
 	//
 	// test that adding tags to both Godspeed and the Event send all tags
@@ -202,7 +182,5 @@ func (t *TestSuite) TestEvent(c *C) {
 
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
-
-	b = []byte("_e{1,1}:j|k|#test0,test1,test8,test9")
-	c.Check(string(a), Equals, string(b))
+	c.Check(string(a), Equals, "_e{1,1}:j|k|#test0,test1,test8,test9")
 }
