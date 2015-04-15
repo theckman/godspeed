@@ -57,7 +57,7 @@ type Godspeed struct {
 // on events and will always return an error.
 func New(host string, port int, autoTruncate bool) (g *Godspeed, err error) {
 	// build a new UDP dialer
-	c, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(host), Port: int(port)})
+	c, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(host), Port: port})
 
 	// if it failed return a pointer to an empty Godspeed struct, and the error
 	if err != nil {
