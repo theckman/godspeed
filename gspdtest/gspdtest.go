@@ -32,7 +32,7 @@ func Listener(l *net.UDPConn, ctrl chan int, c chan []byte) {
 	}
 }
 
-func BuildListener(port uint16) (*net.UDPConn, chan int, chan []byte) {
+func BuildListener(port int) (*net.UDPConn, chan int, chan []byte) {
 	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("127.0.0.1:%d", port))
 
 	if err != nil {

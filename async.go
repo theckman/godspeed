@@ -24,7 +24,7 @@ type AsyncGodspeed struct {
 // autoTruncate dictactes whether long stats emissions get auto-truncated or dropped. Unfortunately,
 // Events will always be dropped. If you need monitor your events, you can access the Godspeed instance
 // directly.
-func NewAsync(host string, port uint16, autoTruncate bool) (a *AsyncGodspeed, err error) {
+func NewAsync(host string, port int, autoTruncate bool) (a *AsyncGodspeed, err error) {
 	gs, err := New(host, port, autoTruncate)
 
 	if err != nil {

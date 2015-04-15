@@ -21,7 +21,7 @@ const (
 	DefaultHost = "127.0.0.1"
 
 	// DefaultPort is 8125
-	DefaultPort uint16 = 8125
+	DefaultPort = 8125
 
 	// MaxBytes is the largest UDP datagram we will try to send
 	// this is 8192 bytes minus the size of a UDP header
@@ -51,11 +51,11 @@ type Godspeed struct {
 }
 
 // New returns a new instance of a Godspeed statsd client.
-// This method takes the host as a string, and port as a uint16.
+// This method takes the host as a string, and port as an int.
 // There is also the ability for autoTruncate. If your metric is longer than MaxBytes
 // autoTruncate can be used to truncate the message instead of erroring. This doesn't work
 // on events and will always return an error.
-func New(host string, port uint16, autoTruncate bool) (g *Godspeed, err error) {
+func New(host string, port int, autoTruncate bool) (g *Godspeed, err error) {
 	// build a new UDP dialer
 	c, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(host), Port: int(port)})
 
