@@ -24,8 +24,7 @@ const (
 	DefaultPort = 8125
 
 	// MaxBytes is the largest UDP datagram we will try to send
-	// this is 8192 bytes minus the size of a UDP header
-	MaxBytes = 8192 - 8
+	MaxBytes = 8192
 )
 
 // Godspeed is an unbuffered Statsd client with compatability geared towards the Datadog statsd format

@@ -77,6 +77,16 @@ func (a *AsyncGodspeed) Send(stat, kind string, delta, sampleRate float64, tags 
 	a.Godspeed.Send(stat, kind, delta, sampleRate, tags)
 }
 
+// ServiceCheck is almost identical to that within the Godspeed client
+// with the addition of an argument and removal of the return value
+func (a *AsyncGodspeed) ServiceCheck(name string, status int, fields map[string]string, tags []string, y *sync.WaitGroup) {
+	if y != nil {
+		defer y.Done()
+	}
+
+	a.Godspeed.ServiceCheck(name, status, fields, tags)
+}
+
 // Count is almost identical to that within the Godspeed client
 // As with the other AsyncGodpseed functions it omits a return value and
 // takes a *sync.WaitGroup instance

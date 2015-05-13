@@ -25,7 +25,7 @@ func removePipes(s string) string {
 // This is a Datadog-specific emission and most likely will not work on other statsd implementations.
 // title and body are both strings, and are the title and body of the event respectively.
 // field can be used to send the optional keys.
-func (g *Godspeed) Event(title, text string, fields map[string]string, tags []string) (err error) {
+func (g *Godspeed) Event(title, text string, fields map[string]string, tags []string) error {
 	if len(title) < 1 {
 		return fmt.Errorf("title must have at least one character")
 	}
@@ -62,13 +62,12 @@ func (g *Godspeed) Event(title, text string, fields map[string]string, tags []st
 	}
 
 	// this handles the logic for truncation
-	// if the buffer length is smaller than the max, just write it
-	// else generate an error to return
-	if buf.Len() <= MaxBytes {
-		_, err = g.Conn.Write(buf.Bytes())
-	} else {
-		err = fmt.Errorf("error sending %v, packet larger than %d (%d)", string(title), MaxBytes, buf.Len())
+	// if the buffer length is larger than the max, return an error
+	// else just write it
+	if bufLen := buf.Len(); bufLen > MaxBytes {
+		return fmt.Errorf("error sending %v, packet larger than %d (%d)", string(title), MaxBytes, buf.Len())
 	}
 
-	return
+	_, err := g.Conn.Write(buf.Bytes())
+	return err
 }

@@ -142,6 +142,20 @@ func (t *ATestSuite) TestAsyncSend(c *C) {
 	c.Check(string(a), Equals, string(b))
 }
 
+func (t *ATestSuite) TestAsyncServiceCheck(c *C) {
+	fields := make(map[string]string)
+	fields["service_check_message"] = "server on fire"
+	fields["timestamp"] = "1431484263"
+	fields["hostname"] = "brainbox01"
+
+	t.g.W.Add(1)
+	go t.g.ServiceCheck("testSvc", 0, fields, []string{"tag:test", "tag2:testing"}, t.g.W)
+
+	dgram, ok := <-t.o
+	c.Assert(ok, Equals, true)
+	c.Check(string(dgram), Equals, "_sc|testSvc|0|m:server on fire|d:1431484263|h:brainbox01|#test0,test1,tag:test,tag2:testing")
+}
+
 func (t *ATestSuite) TestAsyncCount(c *C) {
 	t.g.W.Add(1)
 	go t.g.Count("test.count", 1, extraTestTags, t.g.W)
