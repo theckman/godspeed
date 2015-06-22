@@ -3,13 +3,14 @@
 // license that can be found in the LICENSE file.
 
 // Package godspeed is a statsd client for the Datadog extension of statsd
-// (DogStatsD). It is used to emit statsd stats as well as the Datadog-specific
-// events. This client also has the ability to tag all outgoing statsd metrics.
-// Godspeed is meant for synchronous calls, while AsyncGodspeed is used for
-// what it says on the tin.
+// caled DogStatsD. It can be used to emit statsd stats, Datadog-specific
+// events, and DogStatsD service checks. This client also has the ability to
+// tag all outgoing statsd metrics. Godspeed is meant for synchronous calls,
+// while AsyncGodspeed is used for what it says on the tin.
 //
 // The name godspeed is a bit of a rhyming slang twist on DogStatsD. It's
-// also a poke at the fact that the statsd protocol's transport mechanism is UDP...
+// also a poke at the fact that the statsd protocol's transport mechanism
+// is UDP.
 //
 // DogStatsD is a copyright of Datadog <info@datadoghq.com>
 package godspeed
