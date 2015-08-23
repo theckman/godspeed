@@ -1,6 +1,7 @@
 # Godspeed
 [![TravisCI Build Status](https://img.shields.io/travis/PagerDuty/godspeed/master.svg?style=flat)](https://travis-ci.org/PagerDuty/godspeed)
 [![GoDoc](https://img.shields.io/badge/godspeed-GoDoc-blue.svg?style=flat)](https://godoc.org/github.com/PagerDuty/godspeed)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-brightgreen.svg?style=flat)](https://github.com/PagerDuty/godspeed/blob/master/LICENSE)
 
 Godspeed is a statsd client for the Datadog extension of statsd (DogStatsD).
 The name `godspeed` is a bit of a rhyming slang twist on DogStatsD. It's also a
