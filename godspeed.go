@@ -15,7 +15,10 @@
 // DogStatsD is a copyright of Datadog <info@datadoghq.com>
 package godspeed
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 const (
 	// DefaultHost is 127.0.0.1 (localhost)
@@ -57,7 +60,12 @@ type Godspeed struct {
 // on events and will always return an error.
 func New(host string, port int, autoTruncate bool) (g *Godspeed, err error) {
 	// build a new UDP dialer
-	c, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(host), Port: port})
+	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", host, port))
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := net.DialUDP("udp", nil, addr)
 
 	// if it failed return a pointer to an empty Godspeed struct, and the error
 	if err != nil {
