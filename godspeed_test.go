@@ -7,6 +7,7 @@ package godspeed_test
 import (
 	"net"
 	"testing"
+	"time"
 
 	"github.com/PagerDuty/godspeed"
 	"github.com/PagerDuty/godspeed/gspdtest"
@@ -41,6 +42,7 @@ func (t *TestSuite) TearDownTest(c *C) {
 	t.l.Close()
 	close(t.c)
 	t.g.Conn.Close()
+	time.Sleep(time.Millisecond * 10)
 }
 
 func testBasicFunc(t *TestSuite, c *C, g *godspeed.Godspeed) {
