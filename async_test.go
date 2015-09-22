@@ -43,6 +43,7 @@ func (t *ATestSuite) TearDownTest(c *C) {
 	t.l.Close()
 	close(t.c)
 	t.g.Godspeed.Conn.Close()
+	time.Sleep(time.Millisecond * 10)
 }
 
 func testAsyncBasicFunc(t *ATestSuite, c *C, g *godspeed.AsyncGodspeed) {
