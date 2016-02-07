@@ -31,7 +31,7 @@ const (
 	MaxBytes = 8192
 )
 
-// Godspeed is an unbuffered Statsd client with compatability geared towards the Datadog statsd format
+// Godspeed is an unbuffered Statsd client with compatibility geared towards the Datadog statsd format
 // It consists of Conn (*net.UDPConn) object for sending metrics over UDP,
 // Namespace (string) for namespacing metrics, and Tags ([]string) for tags to send with stats
 type Godspeed struct {
