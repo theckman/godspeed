@@ -219,3 +219,17 @@ func (t *TestSuite) TestSet(c *C) {
 	c.Assert(ok, Equals, true)
 	c.Check(string(a), Equals, "test.set:10|s")
 }
+
+func (t *TestSuite) BenchmarkIncr(c *C) {
+	t.g.SetNamespace("namespace")
+	t.g.AddTags([]string{"a:1111", "b:2"})
+	err := t.g.Incr("bench.incr", []string{"c:333", "d:444", "e:555555555"})
+	c.Assert(err, IsNil)
+
+	a, ok := <-t.o
+	c.Assert(ok, Equals, true)
+	c.Check(string(a), Equals, "namespace.bench.incr:1|c|#a:1111,b:2,c:333,d:444,e:555555555")
+	for i := 0; i < c.N; i++ {
+		t.g.Incr("bench.incr", []string{"c:333", "d:444", "e:555555555"})
+	}
+}

@@ -31,24 +31,28 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 
 	// if we have a namespace write it to the byte buffer
 	if len(g.Namespace) > 0 {
-		buffer.WriteString(fmt.Sprintf("%v.", g.Namespace))
+		buffer.WriteString(g.Namespace)
+		buffer.WriteByte('.')
 	}
 
-	floatStr := strconv.FormatFloat(delta, 'f', -1, 64)
-
 	// write the name of the metric to the byte buffer as well as the metric itself
-	buffer.WriteString(fmt.Sprintf("%v:%v|%v", string(trimReserved(stat)), floatStr, kind))
+	buffer.WriteString(trimReserved(stat))
+	buffer.WriteByte(':')
+	buffer.WriteString(strconv.FormatFloat(delta, 'f', -1, 64))
+	buffer.WriteByte('|')
+	buffer.WriteString(kind)
 
 	// if the sample rate is less than 1 add it too
 	if sampleRate < 1 {
-		floatStr = strconv.FormatFloat(sampleRate, 'f', -1, 64)
-		buffer.WriteString(fmt.Sprintf("|@%v", floatStr))
+		buffer.WriteString("|@")
+		buffer.WriteString(strconv.FormatFloat(sampleRate, 'f', -1, 64))
 	}
 
 	// add any provided tags to the metric
 	tags = uniqueTags(append(g.Tags, tags...))
 	if len(tags) > 0 {
-		buffer.WriteString(fmt.Sprintf("|#%v", strings.Join(tags, ",")))
+		buffer.WriteString("|#")
+		buffer.WriteString(strings.Join(tags, ","))
 	}
 
 	// this handles the logic for truncation
