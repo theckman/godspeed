@@ -7,8 +7,10 @@ package godspeed
 import "strings"
 
 // stats names can't include :, |, or @
+var reservedReplacer = strings.NewReplacer(":", "_", "|", "_", "@", "_")
+
 func trimReserved(s string) string {
-	return strings.NewReplacer(":", "_", "|", "_", "@", "_").Replace(s)
+	return reservedReplacer.Replace(s)
 }
 
 // function to make sure tags are unique
