@@ -13,12 +13,15 @@ import (
 var eventKeys = []string{"date_happened", "hostname", "aggregation_key", "priority", "source_type_name", "alert_type"}
 var eventMarkers = []rune{'d', 'h', 'k', 'p', 's', 't'}
 
+var escapeEventReplacer = strings.NewReplacer("\n", "\\n")
+var pipesReplacer = strings.NewReplacer("|", "")
+
 func escapeEvent(s string) string {
-	return strings.NewReplacer("\n", "\\n").Replace(s)
+	return escapeEventReplacer.Replace(s)
 }
 
 func removePipes(s string) string {
-	return strings.Replace(s, "|", "", -1)
+	return pipesReplacer.Replace(s)
 }
 
 // Event is the function for submitting a Datadog event.
@@ -55,7 +58,7 @@ func (g *Godspeed) Event(title, text string, fields map[string]string, tags []st
 
 	if len(tags) > 0 {
 		for i, v := range tags {
-			tags[i] = strings.Replace(v, "|", "", -1)
+			tags[i] = removePipes(v)
 		}
 
 		buf.WriteString(fmt.Sprintf("|#%v", strings.Join(tags, ",")))
