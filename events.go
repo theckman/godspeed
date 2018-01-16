@@ -7,18 +7,22 @@ package godspeed
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 var eventKeys = []string{"date_happened", "hostname", "aggregation_key", "priority", "source_type_name", "alert_type"}
 var eventMarkers = []rune{'d', 'h', 'k', 'p', 's', 't'}
 
+var escapeEventReplacer = strings.NewReplacer("\n", "\\n")
+var pipesReplacer = strings.NewReplacer("|", "")
+
 func escapeEvent(s string) string {
-	return strings.NewReplacer("\n", "\\n").Replace(s)
+	return escapeEventReplacer.Replace(s)
 }
 
 func removePipes(s string) string {
-	return strings.Replace(s, "|", "", -1)
+	return pipesReplacer.Replace(s)
 }
 
 // Event is the function for submitting a Datadog event.
@@ -39,26 +43,36 @@ func (g *Godspeed) Event(title, text string, fields map[string]string, tags []st
 	title = escapeEvent(title)
 	text = escapeEvent(text)
 
-	buf.WriteString(fmt.Sprintf("_e{%d,%d}:%v|%v", len(title), len(text), title, text))
+	buf.WriteString("_e{")
+	buf.WriteString(strconv.Itoa(len(title)))
+	buf.WriteString(",")
+	buf.WriteString(strconv.Itoa(len(text)))
+	buf.WriteString("}:")
+	buf.WriteString(title)
+	buf.WriteString("|")
+	buf.WriteString(text)
 
 	// if some fields were passed in convert them to their proper format
 	// and write that to the buffer
 	if len(fields) > 0 {
 		for i, v := range eventKeys {
 			if mv, ok := fields[v]; ok {
-				buf.WriteString(fmt.Sprintf("|%v:%v", string(eventMarkers[i]), removePipes(mv)))
+				buf.WriteString("|")
+				buf.WriteString(string(eventMarkers[i]))
+				buf.WriteString(":")
+				pipesReplacer.WriteString(&buf, mv)
 			}
 		}
 	}
 
-	tags = uniqueTags(append(g.Tags, tags...))
-
+	tags = uniqueTags(g.Tags, tags)
 	if len(tags) > 0 {
 		for i, v := range tags {
-			tags[i] = strings.Replace(v, "|", "", -1)
+			tags[i] = removePipes(v)
 		}
 
-		buf.WriteString(fmt.Sprintf("|#%v", strings.Join(tags, ",")))
+		buf.WriteString("|#")
+		buf.WriteString(strings.Join(tags, ","))
 	}
 
 	// this handles the logic for truncation

@@ -36,7 +36,7 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 	}
 
 	// write the name of the metric to the byte buffer as well as the metric itself
-	buffer.WriteString(trimReserved(stat))
+	reservedReplacer.WriteString(&buffer, stat)
 	buffer.WriteByte(':')
 	buffer.WriteString(strconv.FormatFloat(delta, 'f', -1, 64))
 	buffer.WriteByte('|')
@@ -49,7 +49,7 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 	}
 
 	// add any provided tags to the metric
-	tags = uniqueTags(append(g.Tags, tags...))
+	tags = uniqueTags(g.Tags, tags)
 	if len(tags) > 0 {
 		buffer.WriteString("|#")
 		buffer.WriteString(strings.Join(tags, ","))
@@ -72,37 +72,37 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 
 // Count wraps Send() and simplifies the interface for Count stats
 func (g *Godspeed) Count(stat string, count float64, tags []string) error {
-	return g.Send(stat, "c", count, 1, append(g.Tags, tags...))
+	return g.Send(stat, "c", count, 1, tags)
 }
 
 // Incr wraps Send() and simplifies the interface for incrementing a counter
 // It only takes the name of the stat, and tags
 func (g *Godspeed) Incr(stat string, tags []string) error {
-	return g.Count(stat, 1, append(g.Tags, tags...))
+	return g.Count(stat, 1, tags)
 }
 
 // Decr wraps Send() and simplifies the interface for decrementing a counter
 // It only takes the name of the stat, and tags
 func (g *Godspeed) Decr(stat string, tags []string) error {
-	return g.Count(stat, -1, append(g.Tags, tags...))
+	return g.Count(stat, -1, tags)
 }
 
 // Gauge wraps Send() and simplifies the interface for Gauge stats
 func (g *Godspeed) Gauge(stat string, value float64, tags []string) error {
-	return g.Send(stat, "g", value, 1, append(g.Tags, tags...))
+	return g.Send(stat, "g", value, 1, tags)
 }
 
 // Histogram wraps Send() and simplifies the interface for Histogram stats
 func (g *Godspeed) Histogram(stat string, value float64, tags []string) error {
-	return g.Send(stat, "h", value, 1, append(g.Tags, tags...))
+	return g.Send(stat, "h", value, 1, tags)
 }
 
 // Timing wraps Send() and simplifies the interface for Timing stats
 func (g *Godspeed) Timing(stat string, value float64, tags []string) error {
-	return g.Send(stat, "ms", value, 1, append(g.Tags, tags...))
+	return g.Send(stat, "ms", value, 1, tags)
 }
 
 // Set wraps Send() and simplifies the interface for Timing stats
 func (g *Godspeed) Set(stat string, value float64, tags []string) error {
-	return g.Send(stat, "s", value, 1, append(g.Tags, tags...))
+	return g.Send(stat, "s", value, 1, tags)
 }

@@ -114,7 +114,7 @@ func (g *Godspeed) AddTags(tags []string) []string {
 			g.AddTag(tag)
 		}
 	} else {
-		g.Tags = uniqueTags(tags)
+		g.Tags = uniqueTags(nil, tags)
 	}
 
 	return g.Tags

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	// this is *C comes from
+	"github.com/PagerDuty/godspeed"
 	. "gopkg.in/check.v1"
 )
 
@@ -183,4 +184,25 @@ func (t *TestSuite) TestEvent(c *C) {
 	a, ok = <-t.o
 	c.Assert(ok, Equals, true)
 	c.Check(string(a), Equals, "_e{1,1}:j|k|#test0,test1,test8,test9")
+}
+
+func (t *TestSuite) BenchmarkEvents(c *C) {
+	g, _ := godspeed.NewDefault()
+
+	defer g.Conn.Close()
+
+	title := "Nginx service restart"
+	text := "The Nginx service has been restarted"
+
+	// the optionals are for the optional arguments available for an event
+	// http://docs.datadoghq.com/guides/dogstatsd/#fields
+	optionals := make(map[string]string)
+	optionals["alert_type"] = "info"
+	optionals["source_type_name"] = "nginx"
+
+	addlTags := []string{"source_type:nginx"}
+
+	for i := 0; i < c.N; i++ {
+		g.Event(title, text, optionals, addlTags)
+	}
 }
