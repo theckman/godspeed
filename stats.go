@@ -49,7 +49,7 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 	}
 
 	// add any provided tags to the metric
-	tags = uniqueTags(append([]string{}, append(g.Tags, tags...)...))
+	tags = uniqueTags(g.Tags, tags)
 	if len(tags) > 0 {
 		buffer.WriteString("|#")
 		buffer.WriteString(strings.Join(tags, ","))

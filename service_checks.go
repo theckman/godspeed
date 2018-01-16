@@ -56,7 +56,7 @@ func (g *Godspeed) ServiceCheck(name string, status int, fields map[string]strin
 		}
 	}
 
-	tags = uniqueTags(append([]string{}, append(g.Tags, tags...)...))
+	tags = uniqueTags(g.Tags, tags)
 
 	if len(tags) > 0 {
 		for i, v := range tags {

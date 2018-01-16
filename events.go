@@ -65,7 +65,7 @@ func (g *Godspeed) Event(title, text string, fields map[string]string, tags []st
 		}
 	}
 
-	tags = uniqueTags(append([]string{}, append(g.Tags, tags...)...))
+	tags = uniqueTags(g.Tags, tags)
 	if len(tags) > 0 {
 		for i, v := range tags {
 			tags[i] = removePipes(v)

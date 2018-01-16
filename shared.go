@@ -14,7 +14,12 @@ func trimReserved(s string) string {
 }
 
 // function to make sure tags are unique
-func uniqueTags(t []string) []string {
+func uniqueTags(gt, t []string) []string {
+	allTags := make([]string, 0, len(gt)+len(t))
+	allTags = append(allTags, gt...)
+	allTags = append(allTags, t...)
+	t = allTags
+
 	// if the tag slice is empty avoid allocation
 	if len(t) < 1 {
 		return nil
