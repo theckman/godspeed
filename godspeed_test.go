@@ -1,4 +1,6 @@
-// Copyright 2014-2015 PagerDuty, Inc, et al. All rights reserved.
+// Copyright 2014-2015 PagerDuty, Inc.
+// Copyright 2018 Tim Heckman
+// All rights reserved.
 // Use of this source code is governed by the BSD 3-Clause
 // license that can be found in the LICENSE file.
 
@@ -9,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/PagerDuty/godspeed"
-	"github.com/PagerDuty/godspeed/gspdtest"
+	"github.com/theckman/godspeed"
+	"github.com/theckman/godspeed/gspdtest"
 
 	// this is *C comes from
 	. "gopkg.in/check.v1"

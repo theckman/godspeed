@@ -1,13 +1,13 @@
 # Godspeed
-[![TravisCI Build Status](https://img.shields.io/travis/PagerDuty/godspeed/master.svg?style=flat)](https://travis-ci.org/PagerDuty/godspeed)
-[![GoDoc](https://img.shields.io/badge/godspeed-GoDoc-blue.svg?style=flat)](https://godoc.org/github.com/PagerDuty/godspeed)
-[![License](https://img.shields.io/badge/License-BSD_3--Clause-brightgreen.svg?style=flat)](https://github.com/PagerDuty/godspeed/blob/master/LICENSE)
+[![TravisCI Build Status](https://img.shields.io/travis/theckman/godspeed/master.svg?style=flat)](https://travis-ci.org/theckman/godspeed)
+[![GoDoc](https://img.shields.io/badge/godspeed-GoDoc-blue.svg?style=flat)](https://godoc.org/github.com/theckman/godspeed)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-brightgreen.svg?style=flat)](https://github.com/theckman/godspeed/blob/master/LICENSE)
 
 Godspeed is a statsd client for the Datadog extension of statsd (DogStatsD).
 The name `godspeed` is a bit of a rhyming slang twist on DogStatsD. It's also a
 poke at the fact that the statsd protocol's transport mechanism is UDP...
 
-Check out [GoDoc](https://godoc.org/github.com/PagerDuty/godspeed) for the docs
+Check out [GoDoc](https://godoc.org/github.com/theckman/godspeed) for the docs
 as well as some examples.
 
 DogStatsD is a copyright of `Datadog <info@datadoghq.com>`.
@@ -18,12 +18,12 @@ the full contents of the license.
 
 ## Installation
 ```
-go get -u github.com/PagerDuty/godspeed
+go get -u github.com/theckman/godspeed
 ```
 
 ## Usage
 For more details either look at the `_example_test.go` files directly or view
-the examples on [GoDoc](https://godoc.org/github.com/PagerDuty/godspeed#pkg-examples).
+the examples on [GoDoc](https://godoc.org/github.com/theckman/godspeed#pkg-examples).
 
 ### Emitting a gauge
 ```Go

@@ -1,10 +1,12 @@
-// Copyright 2014-2015 PagerDuty, Inc, et al. All rights reserved.
+// Copyright 2014-2015 PagerDuty, Inc.
+// Copyright 2018 Tim Heckman
+// All rights reserved.
 // Use of this source code is governed by the BSD 3-Clause
 // license that can be found in the LICENSE file.
 
 package godspeed_test
 
-import "github.com/PagerDuty/godspeed"
+import "github.com/theckman/godspeed"
 
 func Example() {
 	// this uses the default host and port (127.0.0.1:8125)
