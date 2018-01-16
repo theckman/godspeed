@@ -7,6 +7,7 @@ package godspeed
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -42,26 +43,36 @@ func (g *Godspeed) Event(title, text string, fields map[string]string, tags []st
 	title = escapeEvent(title)
 	text = escapeEvent(text)
 
-	buf.WriteString(fmt.Sprintf("_e{%d,%d}:%v|%v", len(title), len(text), title, text))
+	buf.WriteString("_e{")
+	buf.WriteString(strconv.Itoa(len(title)))
+	buf.WriteString(",")
+	buf.WriteString(strconv.Itoa(len(text)))
+	buf.WriteString("}:")
+	buf.WriteString(title)
+	buf.WriteString("|")
+	buf.WriteString(text)
 
 	// if some fields were passed in convert them to their proper format
 	// and write that to the buffer
 	if len(fields) > 0 {
 		for i, v := range eventKeys {
 			if mv, ok := fields[v]; ok {
-				buf.WriteString(fmt.Sprintf("|%v:%v", string(eventMarkers[i]), removePipes(mv)))
+				buf.WriteString("|")
+				buf.WriteString(string(eventMarkers[i]))
+				buf.WriteString(":")
+				pipesReplacer.WriteString(&buf, mv)
 			}
 		}
 	}
 
-	tags = uniqueTags(append(g.Tags, tags...))
-
+	tags = uniqueTags(append([]string{}, append(g.Tags, tags...)...))
 	if len(tags) > 0 {
 		for i, v := range tags {
 			tags[i] = removePipes(v)
 		}
 
-		buf.WriteString(fmt.Sprintf("|#%v", strings.Join(tags, ",")))
+		buf.WriteString("|#")
+		buf.WriteString(strings.Join(tags, ","))
 	}
 
 	// this handles the logic for truncation
