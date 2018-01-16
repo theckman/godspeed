@@ -36,7 +36,7 @@ func (g *Godspeed) Send(stat, kind string, delta, sampleRate float64, tags []str
 	}
 
 	// write the name of the metric to the byte buffer as well as the metric itself
-	buffer.WriteString(trimReserved(stat))
+	reservedReplacer.WriteString(&buffer, stat)
 	buffer.WriteByte(':')
 	buffer.WriteString(strconv.FormatFloat(delta, 'f', -1, 64))
 	buffer.WriteByte('|')
