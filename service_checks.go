@@ -7,6 +7,7 @@ package godspeed
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -39,23 +40,30 @@ func (g *Godspeed) ServiceCheck(name string, status int, fields map[string]strin
 
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("_sc|%s|%d", name, status))
+	buf.WriteString("_sc|")
+	buf.WriteString(name)
+	buf.WriteString("|")
+	buf.WriteString(strconv.Itoa(status))
 
 	if len(fields) > 0 {
 		for i, v := range scKeys {
 			if mv, ok := fields[v]; ok {
-				buf.WriteString(fmt.Sprintf("|%s:%s", scMark[i], removePipes(mv)))
+				buf.WriteString("|")
+				buf.WriteString(scMark[i])
+				buf.WriteString(":")
+				pipesReplacer.WriteString(&buf, mv)
 			}
 		}
 	}
 
-	tags = uniqueTags(append(g.Tags, tags...))
+	tags = uniqueTags(append([]string{}, append(g.Tags, tags...)...))
 
 	if len(tags) > 0 {
 		for i, v := range tags {
-			tags[i] = strings.Replace(v, "|", "", -1)
+			tags[i] = removePipes(v)
 		}
-		buf.WriteString(fmt.Sprintf("|#%s", strings.Join(tags, ",")))
+		buf.WriteString("|#")
+		buf.WriteString(strings.Join(tags, ","))
 	}
 
 	if bufLen := buf.Len(); bufLen > MaxBytes {
