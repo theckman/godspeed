@@ -1,8 +1,10 @@
 language: go
 go:
-  - 1.5.3
+  - 1.8.5
+  - 1.9.2
 branches:
   only:
     - master
+install: go get -t ./...
 script: go test -v ./... -check.vv
 sudo: false
