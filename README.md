@@ -3,6 +3,15 @@
 [![GoDoc](https://img.shields.io/badge/godspeed-GoDoc-blue.svg?style=flat)](https://godoc.org/github.com/PagerDuty/godspeed)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-brightgreen.svg?style=flat)](https://github.com/PagerDuty/godspeed/blob/master/LICENSE)
 
+### Deprecation Notice
+This repository is deprecated. No further Issues or Pull Requests will be considered or approved.
+
+Further interest should be directed to the new `godspeed` repository. If you'd like to check out the latest version of the source code, report any issues, contribute any improvements, or download the latest release, please do so at:
+
+* https://github.com/theckman/godspeed
+
+## Overview
+
 Godspeed is a statsd client for the Datadog extension of statsd (DogStatsD).
 The name `godspeed` is a bit of a rhyming slang twist on DogStatsD. It's also a
 poke at the fact that the statsd protocol's transport mechanism is UDP...
